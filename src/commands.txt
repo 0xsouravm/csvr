@@ -1,0 +1,15 @@
+delete - row, column, entry
+
+display - file, row, column
+
+merge - file
+
+sort - rows
+
+add - row, column
+
+modify - row, column, entry
+
+load - file
+
+write to - file
