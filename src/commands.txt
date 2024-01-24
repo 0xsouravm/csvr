@@ -1,6 +1,6 @@
 delete - row, column, entry
 
-display - file, row, column
+display - file, row, column, paginated
 
 merge - file
 
