@@ -11,7 +11,18 @@ This Rust command-line tool provides a set of CSV file manipulation commands, al
 - **Sort and Display**: Arrange rows in ascending order for easy analysis.
 - **Add**: Append new rows and columns effortlessly.
 
-## Usage
+## Install(As a Crate)
+### Add to your Cargo.toml
+```bash
+csvr = "0.1.0"
+```
+
+### Use in code
+```bash
+use csvr::{ CSVFile, CSVError, FileDataUtils };
+```
+
+## Usage(Locally)
 ### Load File
 ```bash
 cargo run csvfile.csv
