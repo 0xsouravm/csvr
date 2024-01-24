@@ -2,7 +2,11 @@
 name = "csvr"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
+author = "Srv-Rits"
+description = "A cli tool to parse and manipulate csv files"
+repository = "https://github.com/0xsouravm/csvr"
+license = "MIT"
+keywords = ["csv", "file manipulation", "cli"]
+categories = ["command-line-utilities"]
+exclude = ["./mycsv.csv", "./yourcsv.csv"]
+readme = "./README.md"
