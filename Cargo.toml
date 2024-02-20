@@ -1,6 +1,6 @@
 [package]
 name = "csvr"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 author = "Srv-Rits"
 description = "A cli tool to parse and manipulate csv files"
