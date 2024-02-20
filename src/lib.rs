@@ -434,7 +434,8 @@ impl FileDataUtils for CSVFile {
             return Ok(()) 
         }
         self.file_data.push(row_data.clone());
-    
+        self.num_rows += 1;
+
         println!(">>>  \x1b[32mSuccessfully Added Row: {}\x1b[0m", row_data);
         Ok(()) 
     }
