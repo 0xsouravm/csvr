@@ -14,7 +14,7 @@ This Rust command-line tool provides a set of CSV file manipulation commands, al
 ## Install(As a Crate)
 ### Add to your Cargo.toml
 ```bash
-csvr = "0.1.0"
+csvr = "0.1.1"
 ```
 
 ### Use in code
