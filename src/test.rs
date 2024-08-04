@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use csvr::{FileDataUtils, CSVError};
+    use csvr::{CSVError, FileDataUtils};
 
     #[test]
     fn test_display_file_incorrect_row_index() {
@@ -229,7 +229,6 @@ mod tests {
         }
     }
 }
-
 
 // Red: \x1b[31m
 // Bold: \x1b[1m

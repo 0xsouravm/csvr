@@ -1,343 +1,398 @@
-use::csvr::{ CSVFile, FileDataUtils };
+use ::csvr::{CSVFile, FileDataUtils};
 
 pub fn query_resolver(query: String, file: &mut CSVFile) {
     let query_elements: Vec<&str> = query.trim().split(' ').collect();
     let num_elements = query_elements.len();
-    if num_elements == 0 { return }
+    if num_elements == 0 {
+        return;
+    }
     let action = query_elements[0].trim();
     match action {
         "display" | "-d" => {
             if num_elements < 2 {
-                eprintln!("\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'file'.\x1b[0m");
-                return 
+                eprintln!(
+                    "\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'file'.\x1b[0m"
+                );
+                return;
             }
             match query_elements[1].trim() {
                 "row" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need row index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 3 {                         
-                        eprintln!("\x1b[31mcsvr: extra arguments found: need only row index.\x1b[0m");
-                        return
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments found: need only row index.\x1b[0m"
+                        );
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(row_ind) => {
-                            let _ = file.display_row(row_ind)
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file.display_row(row_ind).unwrap_or_else(|err| {
+                                eprintln!("\x1b[31m{}\x1b[0m", err);
+                            });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "col" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need col index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 3 {                         
-                        eprintln!("\x1b[31mcsvr: extra arguments found: need only col index.\x1b[0m");
-                        return
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments found: need only col index.\x1b[0m"
+                        );
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(col_ind) => {
-                            let _ = file.display_column(col_ind)
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file.display_column(col_ind).unwrap_or_else(|err| {
+                                eprintln!("\x1b[31m{}\x1b[0m", err);
+                            });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "file" => {
-                    if num_elements < 3 {                         
-                        let _ = file.display_file(None, None)
-                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-                        return 
+                    if num_elements < 3 {
+                        let _ = file.display_file(None, None).unwrap_or_else(|err| {
+                            eprintln!("\x1b[31m{}\x1b[0m", err);
+                        });
+                        return;
                     }
-                    if num_elements < 4 {                         
-                        eprintln!("\x1b[31mcsvr: argument missing: need both start and end index.\x1b[0m");
-                        return 
+                    if num_elements < 4 {
+                        eprintln!(
+                            "\x1b[31mcsvr: argument missing: need both start and end index.\x1b[0m"
+                        );
+                        return;
                     }
-                    if num_elements > 4 {                         
+                    if num_elements > 4 {
                         eprintln!("\x1b[31mcsvr: extra arguments found: need only start and end index.\x1b[0m");
-                        return
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
-                        Ok(s_index) => {
-                            match query_elements[3].trim().parse::<usize>() {
-                                Ok(e_index) => {
-                                    let _ = file.display_file(Some(s_index), Some(e_index))
-                                                .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-                                }
-                                Err(err) => {
-                                    eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
-                                }
+                        Ok(s_index) => match query_elements[3].trim().parse::<usize>() {
+                            Ok(e_index) => {
+                                let _ = file
+                                    .display_file(Some(s_index), Some(e_index))
+                                    .unwrap_or_else(|err| {
+                                        eprintln!("\x1b[31m{}\x1b[0m", err);
+                                    });
                             }
-                        }
+                            Err(err) => {
+                                eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
+                            }
+                        },
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
-                _ => eprintln!("\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'file'.\x1b[0m")
+                }
+                _ => eprintln!(
+                    "\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'file'.\x1b[0m"
+                ),
             }
         }
 
         "delete" | "-r" => {
             if num_elements < 2 {
-                eprintln!("\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'item'.\x1b[0m");
-                return 
+                eprintln!(
+                    "\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'item'.\x1b[0m"
+                );
+                return;
             }
             match query_elements[1].trim() {
                 "row" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need row index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 3 {                         
-                        eprintln!("\x1b[31mcsvr: extra arguments found: need only row index.\x1b[0m");
-                        return
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments found: need only row index.\x1b[0m"
+                        );
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(row_ind) => {
-                            let _ = file.delete_row(row_ind)
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file.delete_row(row_ind).unwrap_or_else(|err| {
+                                eprintln!("\x1b[31m{}\x1b[0m", err);
+                            });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "col" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need col index.\x1b[0m");
-                        return
+                        return;
                     }
-                    if num_elements > 3 {                         
-                        eprintln!("\x1b[31mcsvr: extra arguments found: need only col index.\x1b[0m");
-                        return
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments found: need only col index.\x1b[0m"
+                        );
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(col_ind) => {
-                            let _ = file.delete_column(col_ind)
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file.delete_column(col_ind).unwrap_or_else(|err| {
+                                eprintln!("\x1b[31m{}\x1b[0m", err);
+                            });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "item" => {
-                    if num_elements < 4 {                         
-                        eprintln!("\x1b[31mcsvr: argument missing: need both row and col index.\x1b[0m");
-                        return 
+                    if num_elements < 4 {
+                        eprintln!(
+                            "\x1b[31mcsvr: argument missing: need both row and col index.\x1b[0m"
+                        );
+                        return;
                     }
-                    if num_elements > 4 {                         
+                    if num_elements > 4 {
                         eprintln!("\x1b[31mcsvr: extra arguments found: need only row and col index.\x1b[0m");
-                        return
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
-                        Ok(row_ind) => {
-                            match query_elements[3].trim().parse::<usize>() {
-                                Ok(col_ind) => {
-                                    let _ = file.delete_entry(row_ind, col_ind)
-                                                .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-                                }
-                                Err(err) => {
-                                    eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
-                                }
+                        Ok(row_ind) => match query_elements[3].trim().parse::<usize>() {
+                            Ok(col_ind) => {
+                                let _ = file.delete_entry(row_ind, col_ind).unwrap_or_else(|err| {
+                                    eprintln!("\x1b[31m{}\x1b[0m", err);
+                                });
                             }
-                        }
+                            Err(err) => {
+                                eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
+                            }
+                        },
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
-                _ => eprintln!("\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'item'.\x1b[0m")
+                }
+                _ => eprintln!(
+                    "\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'item'.\x1b[0m"
+                ),
             }
         }
 
         "modify" | "-m" => {
             if num_elements < 2 {
-                eprintln!("\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'item'.\x1b[0m");
-                return 
+                eprintln!(
+                    "\x1b[31mcsvr: argument missing: need either 'row', 'col' or 'item'.\x1b[0m"
+                );
+                return;
             }
             match query_elements[1].trim() {
                 "row" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need row index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements < 4 { 
+                    if num_elements < 4 {
                         eprintln!("\x1b[31mcsvr: argument missing: need new row values.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 4 { 
+                    if num_elements > 4 {
                         eprintln!("\x1b[31mcsvr: extra arguments: need only row index and new row values.\x1b[0m");
-                        return 
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(row_ind) => {
-                            let _ = file.modify_row(row_ind, query_elements[3].trim().to_owned())
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file
+                                .modify_row(row_ind, query_elements[3].trim().to_owned())
+                                .unwrap_or_else(|err| {
+                                    eprintln!("\x1b[31m{}\x1b[0m", err);
+                                });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "col" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need col index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements < 4 { 
+                    if num_elements < 4 {
                         eprintln!("\x1b[31mcsvr: argument missing: need new col values.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 4 { 
+                    if num_elements > 4 {
                         eprintln!("\x1b[31mcsvr: extra arguments: need only col index and new col values.\x1b[0m");
-                        return 
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
                         Ok(col_ind) => {
-                            let _ = file.modify_column(col_ind, query_elements[3].trim().to_owned())
-                                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+                            let _ = file
+                                .modify_column(col_ind, query_elements[3].trim().to_owned())
+                                .unwrap_or_else(|err| {
+                                    eprintln!("\x1b[31m{}\x1b[0m", err);
+                                });
                         }
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
                 "item" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need row index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements < 4 { 
+                    if num_elements < 4 {
                         eprintln!("\x1b[31mcsvr: argument missing: need col index.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements < 5 { 
+                    if num_elements < 5 {
                         eprintln!("\x1b[31mcsvr: argument missing: need new item value.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 5 { 
+                    if num_elements > 5 {
                         eprintln!("\x1b[31mcsvr: extra arguments: need only row index, col index and new item value.\x1b[0m");
-                        return 
+                        return;
                     }
                     match query_elements[2].trim().parse::<usize>() {
-                        Ok(row_ind) => {
-                            match query_elements[3].trim().parse::<usize>() {
-                                Ok(col_ind) => {
-                                    let _ = file.update_entry(
-                                        row_ind, 
-                                        col_ind, 
-                                        query_elements[4].trim().to_owned()
+                        Ok(row_ind) => match query_elements[3].trim().parse::<usize>() {
+                            Ok(col_ind) => {
+                                let _ = file
+                                    .update_entry(
+                                        row_ind,
+                                        col_ind,
+                                        query_elements[4].trim().to_owned(),
                                     )
-                                    .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-
-                                }
-                                Err(err) => {
-                                    eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
-                                }
+                                    .unwrap_or_else(|err| {
+                                        eprintln!("\x1b[31m{}\x1b[0m", err);
+                                    });
                             }
-                        }
+                            Err(err) => {
+                                eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
+                            }
+                        },
 
                         Err(err) => {
                             eprintln!("\x1b[31m{}: Not a Valid Integer Index\x1b[0m", err);
                         }
                     }
-                },
+                }
 
-                _ => eprintln!("\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'item'.\x1b[0m")
+                _ => eprintln!(
+                    "\x1b[31mcsvr: incorrect argument: need either 'row', 'col' or 'item'.\x1b[0m"
+                ),
             }
         }
 
         "add" | "-a" => {
-            if num_elements < 2 { 
+            if num_elements < 2 {
                 eprintln!("\x1b[31mcsvr: argument missing: need either 'row' or 'col'.\x1b[0m");
-                return 
+                return;
             }
             match query_elements[1].trim() {
                 "row" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need row values.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 3 { 
-                        eprintln!("\x1b[31mcsvr: extra arguments: need only new row values.\x1b[0m");
-                        return 
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments: need only new row values.\x1b[0m"
+                        );
+                        return;
                     }
-                    let _ = file.add_row(query_elements[2].trim().to_owned())
-                                .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-
-                },
+                    let _ = file
+                        .add_row(query_elements[2].trim().to_owned())
+                        .unwrap_or_else(|err| {
+                            eprintln!("\x1b[31m{}\x1b[0m", err);
+                        });
+                }
                 "col" => {
-                    if num_elements < 3 { 
+                    if num_elements < 3 {
                         eprintln!("\x1b[31mcsvr: argument missing: need col values.\x1b[0m");
-                        return 
+                        return;
                     }
-                    if num_elements > 3 { 
-                        eprintln!("\x1b[31mcsvr: extra arguments: need only new col values.\x1b[0m");
-                        return 
+                    if num_elements > 3 {
+                        eprintln!(
+                            "\x1b[31mcsvr: extra arguments: need only new col values.\x1b[0m"
+                        );
+                        return;
                     }
-                    let _ = file.add_column(query_elements[2].trim().to_owned())
-                                .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
-                },
-                _ => eprintln!("\x1b[31mcsvr: incorrect argument: need either 'row' or 'col'.\x1b[0m")
+                    let _ = file
+                        .add_column(query_elements[2].trim().to_owned())
+                        .unwrap_or_else(|err| {
+                            eprintln!("\x1b[31m{}\x1b[0m", err);
+                        });
+                }
+                _ => eprintln!(
+                    "\x1b[31mcsvr: incorrect argument: need either 'row' or 'col'.\x1b[0m"
+                ),
             }
         }
 
         "merge" | "-M" => {
-            if num_elements < 2 { 
+            if num_elements < 2 {
                 eprintln!("\x1b[31mcsvr: argument missing: need second file's name.\x1b[0m");
-                return 
+                return;
             }
-            if num_elements > 2 { 
+            if num_elements > 2 {
                 eprintln!("\x1b[31mcsvr: extra arguments: need only second file's name.\x1b[0m");
-                return 
+                return;
             }
             let other = CSVFile::new(&query_elements[1].trim().to_owned());
-            let _ = file.merge_files(&other)
-                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+            let _ = file.merge_files(&other).unwrap_or_else(|err| {
+                eprintln!("\x1b[31m{}\x1b[0m", err);
+            });
         }
 
         "sort" | "-s" => {
-            if num_elements > 1 { 
-                eprintln!("\x1b[31mcsvr: extra arguments: command doesn't take any arguments.\x1b[0m");
-                return 
+            if num_elements > 1 {
+                eprintln!(
+                    "\x1b[31mcsvr: extra arguments: command doesn't take any arguments.\x1b[0m"
+                );
+                return;
             }
-            let _ = file.sorted_display()
-                        .unwrap_or_else(|err| {eprintln!("\x1b[31m{}\x1b[0m", err);});
+            let _ = file.sorted_display().unwrap_or_else(|err| {
+                eprintln!("\x1b[31m{}\x1b[0m", err);
+            });
         }
 
         "write" | "-w" => {
-            if num_elements > 2 { 
+            if num_elements > 2 {
                 eprintln!("\x1b[31mcsvr: extra arguments: need only new file's name.\x1b[0m");
-                return 
+                return;
             }
             if num_elements == 2 {
                 let mut new_file = file.clone();
                 new_file.file_path = query_elements[1].trim().to_owned();
                 new_file.clone().write_to_file();
-            }
-            else {
+            } else {
                 file.write_to_file();
             }
         }
 
         "help" | "-h" => {
-            if num_elements > 2 { 
-                eprintln!("\x1b[31mcsvr: extra arguments: command doesn't take any arguments.\x1b[0m");
-                return 
+            if num_elements > 2 {
+                eprintln!(
+                    "\x1b[31mcsvr: extra arguments: command doesn't take any arguments.\x1b[0m"
+                );
+                return;
             }
             display_help();
         }
 
-        _ => eprintln!("\x1b[31mcsvr: command not found: use 'help' or '-h' for available commands.\x1b[0m")
+        _ => eprintln!(
+            "\x1b[31mcsvr: command not found: use 'help' or '-h' for available commands.\x1b[0m"
+        ),
     }
 }
 
@@ -381,4 +436,4 @@ fn display_help() {
     ";
 
     println!("{}", help_string);
-}       
+}
